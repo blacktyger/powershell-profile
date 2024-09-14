@@ -19,8 +19,8 @@ function Test-InternetConnection {
 # Function to install Nerd Fonts
 function Install-NerdFonts {
     param (
-        [string]$FontName = "CascadiaCode",
-        [string]$FontDisplayName = "CaskaydiaCove NF",
+        [string]$FontName = "Meslo",
+        [string]$FontDisplayName = "MesloLG NF",
         [string]$Version = "3.2.1"
     )
 
@@ -79,7 +79,7 @@ if (!(Test-Path -Path $PROFILE -PathType Leaf)) {
             New-Item -Path $profilePath -ItemType "directory"
         }
 
-        Invoke-RestMethod https://github.com/ChrisTitusTech/powershell-profile/raw/main/Microsoft.PowerShell_profile.ps1 -OutFile $PROFILE
+        Invoke-RestMethod https://github.com/blacktyger/powershell-profile/raw/main/Microsoft.PowerShell_profile.ps1 -OutFile $PROFILE
         Write-Host "The profile @ [$PROFILE] has been created."
         Write-Host "If you want to make any personal changes or customizations, please do so at [$profilePath\Profile.ps1] as there is an updater in the installed profile which uses the hash to update the profile and will lead to loss of changes"
     }
@@ -99,30 +99,30 @@ else {
     }
 }
 
-# OMP Install
-try {
-    winget install -e --accept-source-agreements --accept-package-agreements JanDeDobbeleer.OhMyPosh
-}
-catch {
-    Write-Error "Failed to install Oh My Posh. Error: $_"
-}
-
-# Font Install
-Install-NerdFonts -FontName "CascadiaCode" -FontDisplayName "CaskaydiaCove NF"
-
-# Final check and message to the user
-if ((Test-Path -Path $PROFILE) -and (winget list --name "OhMyPosh" -e) -and ($fontFamilies -contains "CaskaydiaCove NF")) {
-    Write-Host "Setup completed successfully. Please restart your PowerShell session to apply changes."
-} else {
-    Write-Warning "Setup completed with errors. Please check the error messages above."
-}
-
 # Choco install
 try {
     Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
 }
 catch {
     Write-Error "Failed to install Chocolatey. Error: $_"
+}
+
+# Font Install
+Install-NerdFonts -FontName "Meslo" -FontDisplayName "MesloLG NF"
+
+# Starship install
+try {
+    choco install starship
+}
+catch {
+    Write-Error "Failed to install starship. Error: $_"
+}
+
+# Final check and message to the user
+if ((Test-Path -Path $PROFILE) -and ($fontFamilies -contains "MesloLG NF")) {
+    Write-Host "Setup completed successfully. Please restart your PowerShell session to apply changes."
+} else {
+    Write-Warning "Setup completed with errors. Please check the error messages above."
 }
 
 # Terminal Icons Install
