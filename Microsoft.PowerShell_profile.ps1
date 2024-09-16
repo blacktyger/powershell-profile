@@ -1,20 +1,8 @@
-### PowerShell Profile Refactor
-### Version 1.03 - Refactored
+### Version 1.0 - Refactored by @blacktyg3r
 
-#################################################################################################################################
-############                                                                                                         ############
-############                                          !!!   WARNING:   !!!                                           ############
-############                                                                                                         ############
-############                DO NOT MODIFY THIS FILE. THIS FILE IS HASHED AND UPDATED AUTOMATICALLY.                  ############
-############                    ANY CHANGES MADE TO THIS FILE WILL BE OVERWRITTEN BY COMMITS TO                      ############
-############                       https://github.com/ChrisTitusTech/powershell-profile.git.                         ############
-############                                                                                                         ############
-#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!#
-############                                                                                                         ############
-############                      IF YOU WANT TO MAKE CHANGES, USE THE Edit-Profile FUNCTION                         ############
-############                              AND SAVE YOUR CHANGES IN THE FILE CREATED.                                 ############
-############                                                                                                         ############
-#################################################################################################################################
+###########################################################################################
+############    Fork of: https://github.com/ChrisTitusTech/powershell-profile  ############
+###########################################################################################
 
 #opt-out of telemetry before doing anything, only if PowerShell is run as admin
 if ([bool]([System.Security.Principal.WindowsIdentity]::GetCurrent()).IsSystem) {
@@ -57,7 +45,6 @@ function Update-Profile {
         Remove-Item "$env:temp/Microsoft.PowerShell_profile.ps1" -ErrorAction SilentlyContinue
     }
 }
-Update-Profile
 
 function Update-PowerShell {
     if (-not $global:canConnectToGitHub) {
@@ -90,6 +77,31 @@ function Update-PowerShell {
 Update-PowerShell
 
 
+# Add/Remove $PATHs
+Function setpath {
+    param (
+        [string]$add,
+        [string]$rm,
+        [ValidateSet('Process', 'User', 'Machine')]
+        [string]$Scope = 'User'
+    )
+    $regexPaths = @()
+    if ($PSBoundParameters.Keys -contains 'add') {
+        $regexPaths += [regex]::Escape($add)
+    }
+
+    if ($PSBoundParameters.Keys -contains 'rm') {
+        $regexPaths += [regex]::Escape($rm)
+    }
+    
+    $arrPath = [System.Environment]::GetEnvironmentVariable('PATH', $Scope) -split ';'
+    foreach ($path in $regexPaths) {
+        $arrPath = $arrPath | Where-Object { $_ -notMatch "^$path\\?" }
+    }
+    $value = ($arrPath + $add) -join ';'
+    [System.Environment]::SetEnvironmentVariable('PATH', $value, $Scope)
+}
+
 # Admin Check and Prompt Customization
 $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 function prompt {
@@ -106,18 +118,22 @@ function Test-CommandExists {
 }
 
 # Editor Configuration
-$EDITOR = if (Test-CommandExists nvim) { 'nvim' }
+$EDITOR = if (Test-CommandExists sublime_text) { 'sublime_text' }
+          elseif (Test-CommandExists nvim) { 'nvim' }
           elseif (Test-CommandExists pvim) { 'pvim' }
           elseif (Test-CommandExists vim) { 'vim' }
           elseif (Test-CommandExists vi) { 'vi' }
           elseif (Test-CommandExists code) { 'code' }
           elseif (Test-CommandExists notepad++) { 'notepad++' }
-          elseif (Test-CommandExists sublime_text) { 'sublime_text' }
           else { 'notepad' }
 Set-Alias -Name vim -Value $EDITOR
 
+# Alias for PyCharm
+Set-Alias -Name pyc -Value pycharm64 -Option AllScope -Scope Global -Force
+
+# Edit this file
 function Edit-Profile {
-    vim $PROFILE.CurrentUserAllHosts
+    vim $PROFILE
 }
 function touch($file) { "" | Out-File $file -Encoding ASCII }
 function ff($name) {
@@ -134,8 +150,8 @@ function winutil {
 	iwr -useb https://christitus.com/win | iex
 }
 
-# System Utilities
-function admin {
+# System Utilities - will run the command with elevated rights in new window
+function sudo {
     if ($args.Count -gt 0) {
         $argList = "& '$args'"
         Start-Process wt -Verb runAs -ArgumentList "pwsh.exe -NoExit -Command $argList"
@@ -143,9 +159,6 @@ function admin {
         Start-Process wt -Verb runAs
     }
 }
-
-# Set UNIX-like aliases for the admin command, so sudo <command> will run the command with elevated rights.
-Set-Alias -Name su -Value admin
 
 function uptime {
     if ($PSVersionTable.PSVersion.Major -eq 5) {
@@ -306,7 +319,7 @@ $PSROptions = @{
     InLinePrediction   = $PSStyle.Foreground.BrightYellow + $PSStyle.Background.BrightBlack
     }
 }
-Set-PSReadLineOption @PSROptionsgp
+Set-PSReadLineOption @PSROptions
 Set-PSReadLineKeyHandler -Chord 'Ctrl+f' -Function ForwardWord
 Set-PSReadLineKeyHandler -Chord 'Enter' -Function ValidateAndAcceptLine
 
@@ -320,21 +333,14 @@ $scriptblock = {
 Register-ArgumentCompleter -Native -CommandName dotnet -ScriptBlock $scriptblock
 
 
-# Get theme from profile.ps1 or use a default theme
-function Get-Theme {
-    if (Test-Path -Path $PROFILE.CurrentUserAllHosts -PathType leaf) {
-        $existingTheme = Select-String -Raw -Path $PROFILE.CurrentUserAllHosts -Pattern "oh-my-posh init pwsh --config"
-        if ($null -ne $existingTheme) {
-            Invoke-Expression $existingTheme
-            return
-        }
-    } else {
-        starship init powershell | Invoke-Expression
-    }
+# Initialize starship prompt and run fastfetch 
+function Get-Prompt{
+    starship init powershell | Invoke-Expression
+    fastfetch -l small --logo-padding-top 5
 }
 
 ## Final Line to set prompt
-Get-Theme
+Get-Prompt
 if (Get-Command zoxide -ErrorAction SilentlyContinue) {
     Invoke-Expression (& { (zoxide init --cmd cd powershell | Out-String) })
 } else {
@@ -350,6 +356,7 @@ if (Get-Command zoxide -ErrorAction SilentlyContinue) {
 
 Set-Alias -Name z -Value __zoxide_z -Option AllScope -Scope Global -Force
 Set-Alias -Name zi -Value __zoxide_zi -Option AllScope -Scope Global -Force
+Set-Alias -Name c -Value clear -Option AllScope -Scope Global -Force
 
 # Help Function
 function Show-Help {
@@ -362,6 +369,8 @@ Update-Profile - Checks for profile updates from a remote repository and updates
 Update-PowerShell - Checks for the latest PowerShell release and updates if a new version is available.
 
 Edit-Profile - Opens the current user's profile for editing using the configured editor.
+
+setpath -add or -rm <PATH> - edit user's $PATH 
 
 touch <file> - Creates a new empty file.
 
@@ -412,6 +421,8 @@ k9 <name> - Kills a process by name.
 la - Lists all files in the current directory with detailed formatting.
 
 ll - Lists all files, including hidden, in the current directory with detailed formatting.
+
+c - clear
 
 gs - Shortcut for 'git status'.
 
