@@ -1,4 +1,4 @@
-# 🎨 PowerShell Profile (Pretty PowerShell) by [https://github.com/ChrisTitusTech](ChrisTitusTech)
+# 🎨 PowerShell Profile (Pretty PowerShell) by [@ChrisTitusTech](https://github.com/ChrisTitusTech)
 
 A stylish and functional PowerShell profile that looks and feels almost as good as a Linux terminal.
 
