@@ -118,21 +118,7 @@ catch {
 # Starship install
 try {
     choco install starship
-}
-catch {
-    Write-Error "Failed to install starship. Error: $_"
-}
-
-# fastfetch install
-try {
     choco install fastfetch
-}
-catch {
-    Write-Error "Failed to install fastfetch. Error: $_"
-}
-
-# fzf install
-try {
     choco install fzf
 }
 catch {
