@@ -110,6 +110,7 @@ catch {
 # Font Install
 try {
     Install-NerdFonts -FontName "Meslo" -FontDisplayName "MesloLG NF"
+}
 catch {
     Write-Error "Failed to install NerdFonts. Error: $_"
 }
@@ -145,6 +146,7 @@ try {
 catch {
     Write-Error "Failed to install Terminal Icons module. Error: $_"
 }
+
 # zoxide Install
 try {
     winget install -e --id ajeetdsouza.zoxide
