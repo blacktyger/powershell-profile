@@ -37,7 +37,7 @@ function Update-Profile {
         $newhash = Get-FileHash "$env:temp/Microsoft.PowerShell_profile.ps1"
         if ($newhash.Hash -ne $oldhash.Hash) {
             Copy-Item -Path "$env:temp/Microsoft.PowerShell_profile.ps1" -Destination $PROFILE -Force
-            Write-Host "Profile has been updated. Please restart your shell to reflect changes" -ForegroundColor Magenta
+            Write-Host "Profile has been updated. Refreshing active shell instance.." -ForegroundColor Magenta
 	    & $PROFILE
         }
     } catch {
