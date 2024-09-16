@@ -20,7 +20,7 @@ function Test-InternetConnection {
 function Install-NerdFonts {
     param (
         [string]$FontName = "Meslo",
-        [string]$FontDisplayName = "MesloLG NF",
+        [string]$FontDisplayName = "MesloLGLDZ NF",
         [string]$Version = "3.2.1"
     )
 
@@ -108,7 +108,11 @@ catch {
 }
 
 # Font Install
-Install-NerdFonts -FontName "Meslo" -FontDisplayName "MesloLG NF"
+try {
+    Install-NerdFonts -FontName "Meslo" -FontDisplayName "MesloLG NF"
+catch {
+    Write-Error "Failed to install NerdFonts. Error: $_"
+}
 
 # Starship install
 try {
@@ -118,11 +122,20 @@ catch {
     Write-Error "Failed to install starship. Error: $_"
 }
 
-# Final check and message to the user
-if ((Test-Path -Path $PROFILE) -and ($fontFamilies -contains "MesloLG NF")) {
-    Write-Host "Setup completed successfully. Please restart your PowerShell session to apply changes."
-} else {
-    Write-Warning "Setup completed with errors. Please check the error messages above."
+# fastfetch install
+try {
+    choco install fastfetch
+}
+catch {
+    Write-Error "Failed to install fastfetch. Error: $_"
+}
+
+# fzf install
+try {
+    choco install fzf
+}
+catch {
+    Write-Error "Failed to install fzf. Error: $_"
 }
 
 # Terminal Icons Install
@@ -139,4 +152,11 @@ try {
 }
 catch {
     Write-Error "Failed to install zoxide. Error: $_"
+}
+
+# Final check and message to the user
+if ((Test-Path -Path $PROFILE) -and ($fontFamilies -contains "MesloLGLDZ NF")) {
+    Write-Host "Setup completed successfully. Please restart your PowerShell session to apply changes."
+} else {
+    Write-Warning "Setup completed with errors. Please check the error messages above."
 }
