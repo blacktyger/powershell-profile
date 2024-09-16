@@ -329,7 +329,7 @@ function Get-Theme {
             return
         }
     } else {
-        Invoke-Expression (&starship init powershell)
+        starship init powershell | Invoke-Expression
     }
 }
 
