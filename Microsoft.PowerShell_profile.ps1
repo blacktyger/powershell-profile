@@ -85,20 +85,23 @@ Function setpath {
         [ValidateSet('Process', 'User', 'Machine')]
         [string]$Scope = 'User'
     )
+    $env:add_p = "$add"
+    $env:rm_p = "$rm"
+
     $regexPaths = @()
     if ($PSBoundParameters.Keys -contains 'add') {
-        $regexPaths += [regex]::Escape($add)
+        $regexPaths += [regex]::Escape($env:add_p)
     }
 
     if ($PSBoundParameters.Keys -contains 'rm') {
-        $regexPaths += [regex]::Escape($rm)
+        $regexPaths += [regex]::Escape($env:rm_p)
     }
     
     $arrPath = [System.Environment]::GetEnvironmentVariable('PATH', $Scope) -split ';'
     foreach ($path in $regexPaths) {
         $arrPath = $arrPath | Where-Object { $_ -notMatch "^$path\\?" }
     }
-    $value = ($arrPath + $add) -join ';'
+    $value = ($arrPath + $env:add_p) -join ';'
     [System.Environment]::SetEnvironmentVariable('PATH', $value, $Scope)
 }
 
