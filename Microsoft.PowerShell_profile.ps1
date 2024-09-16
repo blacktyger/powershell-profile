@@ -67,7 +67,8 @@ function Update-PowerShell {
         if ($updateNeeded) {
             Write-Host "Updating PowerShell..." -ForegroundColor Yellow
             winget upgrade "Microsoft.PowerShell" --accept-source-agreements --accept-package-agreements
-            Write-Host "PowerShell has been updated. Please restart your shell to reflect changes" -ForegroundColor Magenta
+            Write-Host "PowerShell has been updated. Refreshing active shell instance.." -ForegroundColor Magenta
+	    & $PROFILE
         } else {
             Write-Host "Your PowerShell is up to date." -ForegroundColor Green
         }
