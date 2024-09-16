@@ -85,10 +85,11 @@ Function setpath {
         [ValidateSet('Process', 'User', 'Machine')]
         [string]$Scope = 'User'
     )
+    # To handle white spaces in paths
     $env:add_p = "$add"
     $env:rm_p = "$rm"
-
     $regexPaths = @()
+    
     if ($PSBoundParameters.Keys -contains 'add') {
         $regexPaths += [regex]::Escape($env:add_p)
     }
